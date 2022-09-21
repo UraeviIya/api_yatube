@@ -6,6 +6,10 @@ from rest_framework.exceptions import PermissionDenied
 
 from .permissions import IsAuthorOrReadOnly
 
+# 403 Forbidden Неверны авторизационные данные, указанные в запросе
+# или запрещен доступ к запрашиваемому ресурсу.
+API_RAISE_403 = PermissionDenied('Изменение чужого контента запрещено!')
+
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Group.objects.all()
@@ -21,12 +25,12 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if serializer.instance.author != self.request.user:
-            raise PermissionDenied
-        super().perform_update(serializer)
+            raise API_RAISE_403
+        super(PostViewSet, self).perform_update(serializer)
 
     def perform_destroy(self, instance):
         if instance.author != self.request.user:
-            raise PermissionDenied
+            raise API_RAISE_403
         instance.delete()
 
 
